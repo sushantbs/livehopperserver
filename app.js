@@ -5,9 +5,9 @@ var serveStatic = require('serve-static');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
-var routes = require('./routes/index');
-var users = require('./routes/users');
+var cors = require('cors');
+var routes = require('./src/routes');
+var api = require('./src/routes/api');
 var debug = require('debug')('nep:server');
 var http = require('http');
 
@@ -23,12 +23,14 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+//app.use(cors());
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/js', express.static(path.join(__dirname, 'build')));
 
+app.use('/api', api);
 app.use('/', routes);
-app.use('/users', users);
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
@@ -42,6 +44,8 @@ app.use(function(req, res, next) {
 // will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
+
+    console.log('dev error: ', err);
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
@@ -53,6 +57,7 @@ if (app.get('env') === 'development') {
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
+  console.log('PROD ERROR: ', err);
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
@@ -65,13 +70,12 @@ app.use(function(err, req, res, next) {
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
-
 var server = http.createServer(app);
 
 /**
@@ -81,6 +85,14 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+process.on('uncaughtException', (err) => {
+  console.log('UNCAUGHT EXCEPTION: ', err);
+});
+
+process.on('unhandledRejection', (reason, p) => {
+  console.log('UNHANDLED REJECTION: ', reason, ' of Promise ', p);
+});
 
 /**
  * Normalize a port into a number, string, or false.
@@ -118,14 +130,15 @@ function onError(error) {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+      console.log(bind + ' requires elevated privileges');
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+      console.log(bind + ' is already in use');
       process.exit(1);
       break;
     default:
+      console.log(error);
       throw error;
   }
 }
@@ -139,5 +152,5 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  console.log('Listening on ' + bind);
 }
