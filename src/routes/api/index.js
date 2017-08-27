@@ -118,6 +118,17 @@ var validate = function(req, res, next) {
 		});
 };
 
+router.post('/user/logout', (req, res, next) => {
+	let token = req.headers.token;
+
+	if (!token) {
+		res.status(500).send('Token not found');
+		return;
+	}
+
+	cache.delete(token).then(res.send({ success: true }));
+});
+
 router.get('/user/profile', validate, (req, res, next) => {
 	var oAuthUserObj = req.user.get(req);
 	var emailId = oAuthUserObj.email;
