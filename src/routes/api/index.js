@@ -11,10 +11,18 @@ var serviceUrl = `${config.db.endpoint}/api`;
 var cacheClient = memjs.Client.create();
 var cache = {
   get: key => (new Promise((resolve, reject) => {
-    cacheClient.get(key, (err, val) => (err ? reject(err) : resolve(val)));
+    //console.log(`Getting ${key} from cache`);
+    cacheClient.get(key, (err, val) => {
+      console.log(err, val);
+      return (err ? reject(err) : resolve(val))
+    });
   })),
   set: (key, value, expires) => (new Promise((resolve, reject) => {
-    cacheClient.set(key, val, {expires}, (err, val) => (err ? reject(err) : resolve(val)));
+    //console.log(`Setting ${key} to cache with value ${value}`);
+    cacheClient.set(key, value, {expires}, (err, val) => {
+      console.log(arguments);
+      return (err ? reject(err) : resolve(val)));
+    }
   })),
   delete: key => (new Promise((resolve, reject) => {
     cacheClient.delete(key, (err, val) => (err ? reject(err) : resolve(val)));
@@ -121,7 +129,8 @@ router.get('/user/feed', validate, (req, res, next) => {
   var oAuthUserObj = req.user.get(req),
     emailId = oAuthUserObj.email;
 
-  cache.get(emailId)
+  cache
+    .get(emailId)
     .then((userProfile) => {
       console.log(userProfile);
       if (userProfile) {
