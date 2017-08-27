@@ -13,14 +13,14 @@ var cache = {
 	get: key =>
 		new Promise((resolve, reject) =>
 			cacheClient.get(key, (err, val) => {
-				console.log(`GET ${key} from cache: ${val}; Error: ${err}`);
-				return err ? reject(err) : resolve(val);
+				console.log(`CACHEGET: ${key} from cache: ${val}; Error: ${err}`);
+				return err ? reject(err) : resolve(JSON.parse(val));
 			})
 		),
 	set: (key, value, expires) =>
 		new Promise((resolve, reject) => {
-			cacheClient.set(key, value, { expires }, (err, val) => {
-				console.log(`SET ${key} to cache: ${val}; Error: ${err}`);
+			cacheClient.set(key, JSON.stringify(value), { expires }, (err, val) => {
+				console.log(`CACHESET: ${key} to cache: ${val}; Error: ${err}`);
 				return err ? reject(err) : resolve(val);
 			});
 		}),
@@ -33,6 +33,7 @@ var cache = {
 var errorHandler = function(res) {
 	return function(err) {
 		if (err) {
+			console.log(`NETWORK ERROR: ${err}`);
 			res.status(500).send(err);
 			return;
 		}
@@ -62,7 +63,12 @@ var validate = function(req, res, next) {
 								token
 						)
 							.then(response => response.json())
-							.then(respJson => resolve(respJson))
+							.then(respJson => {
+								console.log(
+									`access token response: ${JSON.stringify(respJson)}`
+								);
+								resolve(respJson);
+							})
 							.catch(err => reject(err));
 					}),
 					new Promise((resolve, reject) => {
@@ -70,7 +76,10 @@ var validate = function(req, res, next) {
 							'https://graph.facebook.com/me?fields=email&access_token=' + token
 						)
 							.then(response => response.json())
-							.then(respJson => resolve(respJson))
+							.then(respJson => {
+								console.log(`fields response: ${JSON.stringify(respJson)}`);
+								resolve(respJson);
+							})
 							.catch(err => reject(err));
 					})
 				]);
