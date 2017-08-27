@@ -5,8 +5,8 @@ var fetch = require('node-fetch');
 var memjs = require('memjs');
 var _ = require('lodash');
 var Promise = require('es6-promise').Promise;
-var config = require('../../../config/config.dev.js');
-var serviceUrl = config.db.host + ':' + config.db.port + '/api';
+var config = require('../../../config/config.heroku');
+var serviceUrl = `${config.db.endpoint}/api`;
 
 var cacheClient = memjs.Client.create();
 var cache = {
