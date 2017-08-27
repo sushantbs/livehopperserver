@@ -98,6 +98,7 @@ var validate = function(req, res, next) {
 			// Need to set the proper expiryTime
 			if (!responseJson.cached) {
 				let currTime = new Date().valueOf();
+				console.log(`setting token in cache`);
 				cache.set(
 					token,
 					_.extend({ cached: true }, responseJson),
