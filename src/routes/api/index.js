@@ -8,7 +8,19 @@ var Promise = require('es6-promise').Promise;
 var config = require('../../../config/config.dev.js');
 var serviceUrl = config.db.host + ':' + config.db.port + '/api';
 
-var cache = memjs.Client.create();
+var cacheClient = memjs.Client.create();
+var cache = {
+  get: key => (new Promise((resolve, reject) => {
+    cacheClient.get(key, (err, val) => (err ? reject(err) : resolve(val)));
+  })),
+  set: (key, value, expires) => (new Promise((resolve, reject) => {
+    cacheClient.set(key, val, {expires}, (err, val) => (err ? reject(err) : resolve(val)));
+  })),
+  delete: key => (new Promise((resolve, reject) => {
+    cacheClient.delete(key, (err, val) => (err ? reject(err) : resolve(val)));
+  }))
+}
+
 var errorHandler = function (res) {
   return function (err) {
     if (err) {
