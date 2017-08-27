@@ -13,13 +13,14 @@ var cache = {
 	get: key =>
 		new Promise((resolve, reject) =>
 			cacheClient.get(key, (err, val) => {
+				console.log(`GET ${key} from cache: ${val}; Error: ${err}`);
 				return err ? reject(err) : resolve(val);
 			})
 		),
 	set: (key, value, expires) =>
 		new Promise((resolve, reject) => {
-			console.log(arguments);
 			cacheClient.set(key, value, { expires }, (err, val) => {
+				console.log(`SET ${key} to cache: ${val}; Error: ${err}`);
 				return err ? reject(err) : resolve(val);
 			});
 		}),
