@@ -2,13 +2,13 @@ var express = require('express');
 var router = express.Router();
 var request = require('superagent');
 var fetch = require('node-fetch');
-var MemcachePlus = require('memcache-plus');
+var memjs = require('memjs');
 var _ = require('lodash');
 var Promise = require('es6-promise').Promise;
 var config = require('../../../config/config.dev.js');
 var serviceUrl = config.db.host + ':' + config.db.port + '/api';
 
-var cache = new MemcachePlus();
+var cache = memjs.Client.create();
 var errorHandler = function (res) {
   return function (err) {
     if (err) {
