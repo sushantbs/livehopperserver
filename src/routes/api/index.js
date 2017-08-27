@@ -17,11 +17,12 @@ var cache = {
 			})
 		),
 	set: (key, value, expires) =>
-		new Promise((resolve, reject) =>
+		new Promise((resolve, reject) => {
+			console.log(arguments);
 			cacheClient.set(key, value, { expires }, (err, val) => {
 				return err ? reject(err) : resolve(val);
-			})
-		),
+			});
+		}),
 	delete: key =>
 		new Promise((resolve, reject) =>
 			cacheClient.delete(key, (err, val) => (err ? reject(err) : resolve(val)))
