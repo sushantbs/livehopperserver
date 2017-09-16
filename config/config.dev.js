@@ -1,6 +1,5 @@
 module.exports = {
-  db: {
-    host: 'http://localhost',
-    port: 5000
-  }
-}
+    db: {
+        endpoint: "http://localhost:5000"
+    }
+};
