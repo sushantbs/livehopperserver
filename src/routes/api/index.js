@@ -229,7 +229,6 @@ router.post("/user/feed", validate, (req, res, next) => {
     cache
         .get(email)
         .then(userProfile => {
-            console.log(userProfile);
             if (userProfile) {
                 fetch(`${serviceUrl}/user/feed`, {
                     method: "POST",
@@ -248,6 +247,69 @@ router.post("/user/feed", validate, (req, res, next) => {
             }
         })
         .catch(errorHandler(res));
+});
+
+router.get("/user/preferences", validate, async (req, res, next) => {
+    var oAuthUserObj = req.user.get(req),
+        email = oAuthUserObj.email;
+
+    try {
+        let userProfile = await cache.get(email);
+        let personId = userProfile.person._id;
+
+        if (userProfile) {
+            let responseArr = await Promise.all([
+                fetch(`${serviceUrl}/allcategories`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }),
+                fetch(`${serviceUrl}/user/preferences/${personId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+            ]);
+            responseArr[0] = await responseArr[0].json();
+            responseArr[1] = await responseArr[1].json();
+            res.send(responseArr);
+        } else {
+            res.status(403).send();
+        }
+    } catch (e) {
+        errorHandler(res);
+    }
+});
+
+router.put("/user/preferences", validate, async (req, res, next) => {
+    var oAuthUserObj = req.user.get(req),
+        email = oAuthUserObj.email,
+        preferences = req.body.preferences;
+
+    try {
+        let userProfile = await cache.get(email);
+        console.log(userProfile);
+        if (userProfile) {
+            let response = await fetch(`${serviceUrl}/user/preferences`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    personId: userProfile.person._id,
+                    preferences: preferences
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            let respJson = await response.json();
+            res.send(respJson);
+        } else {
+            res.status(403).send();
+        }
+    } catch (e) {
+        errorHandler(res);
+    }
 });
 
 router.get("/gig/details", validate, (req, res, next) => {
